@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config();
+
 import { PORT } from "../constants/index.js";
 import { disconnectDB } from "../lib/prisma.js";
 import { app } from "./app.js";

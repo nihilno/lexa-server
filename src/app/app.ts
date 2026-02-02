@@ -1,11 +1,14 @@
 import cors from "cors";
-import { config } from "dotenv";
 import express, { type Express } from "express";
 import { router as InvoiceRouter } from "./routes/invoice-router.js";
-config();
 
 export const app: Express = express();
 app.use(express.json());
+
+if (!process.env.FRONTEND_URL) {
+  throw new Error("FRONTEND_URL environment variable is required");
+}
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL!,

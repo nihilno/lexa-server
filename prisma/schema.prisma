@@ -7,30 +7,53 @@ datasource db {
   provider = "postgresql"
 }
 
-model User{
+model User {
   id String @id @default(uuid()) @db.Uuid
   name String
   email String @unique
   password String
 
+  defaultAddressId String? @db.Uuid
+  defaultAddress Address? @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
+
+  addresses Address[]
   invoices Invoice[]
 
   @@map("users")
 }
 
+model Address {
+  id String @id @default(uuid()) @db.Uuid
+
+  name String
+  email String
+  street String
+  city String
+  postalCode String
+  country String
+
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  usersWithThisAsDefault User[] @relation("UserDefaultAddress")
+
+  @@map("addresses")
+}
+
 model Invoice {
   id String @id @default(uuid()) @db.Uuid
-  number Int 
   description String
 
   senderName String
-  senderAddress String
+  senderEmail String
+  senderStreet String
   senderCity String
   senderPostalCode String
   senderCountry String
 
   recipientName String
-  recipientAddress String
+  recipientEmail String
+  recipientStreet String
   recipientCity String
   recipientPostalCode String
   recipientCountry String
@@ -39,23 +62,22 @@ model Invoice {
   updatedAt DateTime @updatedAt
   paymentDue DateTime
   totalPayment Decimal @db.Decimal(10, 2)
-  status Status @default(PENDING)
+  status Status @default(Pending)
 
   userId String @db.Uuid
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   items Item[]
 
-  @@unique([number, userId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paymentDue])
+
   @@map("invoices")
 }
 
-enum Status {
-  DRAFT
-  PENDING
-  PAID
-}
-
-model Item{
+model Item {
   id String @id @default(uuid()) @db.Uuid
   name String
   quantity Int
@@ -65,4 +87,10 @@ model Item{
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("items")
+}
+
+enum Status {
+  Draft
+  Pending
+  Paid
 }
