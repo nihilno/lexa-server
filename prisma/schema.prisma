@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User{
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  email String @unique
+  password String
+
+  invoices Invoice[]
+
+  @@map("users")
+}
+
+model Invoice {
+  id String @id @default(uuid()) @db.Uuid
+  number Int 
+  description String
+
+  senderName String
+  senderAddress String
+  senderCity String
+  senderPostalCode String
+  senderCountry String
+
+  recipientName String
+  recipientAddress String
+  recipientCity String
+  recipientPostalCode String
+  recipientCountry String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  paymentDue DateTime
+  totalPayment Decimal @db.Decimal(10, 2)
+  status Status @default(PENDING)
+
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items Item[]
+
+  @@unique([number, userId])
+  @@map("invoices")
+}
+
+enum Status {
+  DRAFT
+  PENDING
+  PAID
+}
+
+model Item{
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  quantity Int
+  price Decimal @db.Decimal(10, 2)
+
+  invoiceId String @db.Uuid
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("items")
+}

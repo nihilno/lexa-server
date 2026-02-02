@@ -1,0 +1,15 @@
+services:
+  lexa:
+    image: "postgres:16-alpine"
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-lexa_user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-lexa_password}"
+      POSTGRES_DB: "${POSTGRES_DB:-lexa_db}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
