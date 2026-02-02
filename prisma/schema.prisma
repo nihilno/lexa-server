@@ -14,7 +14,7 @@ model User {
   password String
 
   defaultAddressId String? @db.Uuid
-  defaultAddress Address? @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
+  defaultAddress Address? @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
 
   addresses Address[]
   invoices Invoice[]
@@ -69,11 +69,8 @@ model Invoice {
 
   items Item[]
 
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([paymentDue])
-
+  //dodamy po id + userId
+  @@index([id, userId])
   @@map("invoices")
 }
 

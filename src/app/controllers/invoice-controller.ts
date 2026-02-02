@@ -57,3 +57,46 @@ export async function getInvoiceById(req: Request, res: Response) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function markAsPaid(req: Request, res: Response) {
+  // check if user is the owner
+
+  const { id } = req.params;
+  if (!id || typeof id !== "string") {
+    return res.status(400).json({ message: "Invalid invoice ID" });
+  }
+
+  try {
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      // where: { id, userId },
+      data: { status: "Paid" },
+    });
+
+    res.status(200).json({ message: "Invoice marked as paid", invoice });
+  } catch (error) {
+    console.error(`Error marking invoice with id ${id} as paid:`, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function deleteInvoice(req: Request, res: Response) {
+  // check if user is the owner
+
+  const { id } = req.params;
+  if (!id || typeof id !== "string") {
+    return res.status(400).json({ message: "Invalid invoice ID" });
+  }
+
+  const invoice = await prisma.invoice.delete({
+    where: { id },
+    // userId
+  });
+
+  res.status(200).json({ message: "Invoice deleted.", invoice });
+  try {
+  } catch (error) {
+    console.error(`Error marking invoice with id ${id} as paid:`, error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
