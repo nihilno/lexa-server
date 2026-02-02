@@ -1,11 +1,13 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
 import { PrismaClient } from "../generated/prisma/client.js";
+config();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const primsa =
+export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: ["query", "info", "warn", "error"],
@@ -15,12 +17,12 @@ export const primsa =
   });
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = primsa;
+  globalForPrisma.prisma = prisma;
 }
 
 export async function connectDB() {
   try {
-    await primsa.$connect();
+    await prisma.$connect();
     console.log("Connecting to the database...");
   } catch (error) {
     console.error("Database connection error:", error);
@@ -29,6 +31,6 @@ export async function connectDB() {
 }
 
 export async function disconnectDB() {
-  await primsa.$disconnect();
+  await prisma.$disconnect();
   console.log("DB disconnected.");
 }
