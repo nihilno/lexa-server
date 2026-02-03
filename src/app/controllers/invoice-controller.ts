@@ -106,7 +106,7 @@ export async function deleteInvoice(req: Request, res: Response) {
 export async function createInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "63633767-eca5-4a8b-992c-7be48fc967cd"; // placeholder
+  const userId = "2b8f6eae-a844-4c03-ae73-d58faa87b00d"; // placeholder
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -116,7 +116,7 @@ export async function createInvoice(req: Request, res: Response) {
     });
   }
 
-  const { items, issueDate } = validated.data;
+  const { items, issueDate, ...rest } = validated.data;
 
   try {
     for (const item of validated.data.items) {
@@ -144,12 +144,12 @@ export async function createInvoice(req: Request, res: Response) {
     );
 
     const invoiceData = {
-      ...validated.data,
+      ...rest,
       totalPayment,
       userId,
       fromName: "Maciej Kowalski",
       fromEmail: "maciej.kowalski@example.com",
-      createdAt: issueDate,
+      issueDate,
       paymentDue,
       status: "Pending" as const,
       items: {

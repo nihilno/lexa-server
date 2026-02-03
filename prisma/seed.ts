@@ -71,24 +71,26 @@ async function main() {
     // Create invoice with snapshot sender + recipient + items
     const invoice = await prisma.invoice.create({
       data: {
-        description: `Invoice #${i}`,
+        projectDescription: `Invoice #${i}`,
 
         // Snapshot sender from defaultAddress
-        senderName: defaultAddress.name,
-        senderEmail: defaultAddress.email,
-        senderStreet: defaultAddress.street,
-        senderCity: defaultAddress.city,
-        senderPostalCode: defaultAddress.postalCode,
-        senderCountry: defaultAddress.country,
+        fromName: defaultAddress.name,
+        fromEmail: defaultAddress.email,
+        fromStreet: defaultAddress.street,
+        fromCity: defaultAddress.city,
+        fromPostCode: defaultAddress.postalCode,
+        fromCountry: defaultAddress.country,
 
         // Snapshot recipient
-        recipientName: `Client ${recipientNumber}`,
-        recipientEmail: `client${recipientNumber}@example.com`,
-        recipientStreet: `${recipientNumber} Client Street`,
-        recipientCity: "Krakow",
-        recipientPostalCode: "30-001",
-        recipientCountry: "Poland",
+        toName: `Client ${recipientNumber}`,
+        toEmail: `client${recipientNumber}@example.com`,
+        toStreet: `${recipientNumber} Client Street`,
+        toCity: "Krakow",
+        toPostCode: "30-001",
+        toCountry: "Poland",
 
+        paymentTerms: "Net 14",
+        issueDate: new Date(),
         createdAt: new Date(),
         paymentDue: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14), // +14 days
         totalPayment,
