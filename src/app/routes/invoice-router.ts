@@ -2,6 +2,7 @@ import express, { type Router } from "express";
 import {
   createInvoice,
   deleteInvoice,
+  editInvoice,
   getInvoiceById,
   getInvoices,
   markAsPaid,
@@ -14,5 +15,6 @@ router.get("/invoices/:id", getInvoiceById);
 router.patch("/invoices/:id", markAsPaid);
 router.delete("/invoices/:id", deleteInvoice);
 router.post("/invoices", createInvoice);
+router.put("/invoices/:id", editInvoice);
 
 export { router };
