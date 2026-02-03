@@ -29,19 +29,19 @@ CREATE TABLE "addresses" (
 -- CreateTable
 CREATE TABLE "invoices" (
     "id" UUID NOT NULL,
-    "description" TEXT NOT NULL,
-    "senderName" TEXT NOT NULL,
-    "senderEmail" TEXT NOT NULL,
-    "senderStreet" TEXT NOT NULL,
-    "senderCity" TEXT NOT NULL,
-    "senderPostalCode" TEXT NOT NULL,
-    "senderCountry" TEXT NOT NULL,
-    "recipientName" TEXT NOT NULL,
-    "recipientEmail" TEXT NOT NULL,
-    "recipientStreet" TEXT NOT NULL,
-    "recipientCity" TEXT NOT NULL,
-    "recipientPostalCode" TEXT NOT NULL,
-    "recipientCountry" TEXT NOT NULL,
+    "projectDescription" TEXT NOT NULL,
+    "fromName" TEXT NOT NULL,
+    "fromEmail" TEXT NOT NULL,
+    "fromStreet" TEXT NOT NULL,
+    "fromCity" TEXT NOT NULL,
+    "fromPostalCode" TEXT NOT NULL,
+    "fromCountry" TEXT NOT NULL,
+    "toName" TEXT NOT NULL,
+    "toEmail" TEXT NOT NULL,
+    "toStreet" TEXT NOT NULL,
+    "toCity" TEXT NOT NULL,
+    "toPostalCode" TEXT NOT NULL,
+    "toCountry" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "paymentDue" TIMESTAMP(3) NOT NULL,
@@ -67,16 +67,7 @@ CREATE TABLE "items" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "invoices_userId_idx" ON "invoices"("userId");
-
--- CreateIndex
-CREATE INDEX "invoices_status_idx" ON "invoices"("status");
-
--- CreateIndex
-CREATE INDEX "invoices_createdAt_idx" ON "invoices"("createdAt");
-
--- CreateIndex
-CREATE INDEX "invoices_paymentDue_idx" ON "invoices"("paymentDue");
+CREATE INDEX "invoices_id_userId_idx" ON "invoices"("id", "userId");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_defaultAddressId_fkey" FOREIGN KEY ("defaultAddressId") REFERENCES "addresses"("id") ON DELETE SET NULL ON UPDATE CASCADE;

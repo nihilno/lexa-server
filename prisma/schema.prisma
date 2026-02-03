@@ -42,21 +42,21 @@ model Address {
 
 model Invoice {
   id String @id @default(uuid()) @db.Uuid
-  description String
+  projectDescription String
 
-  senderName String
-  senderEmail String
-  senderStreet String
-  senderCity String
-  senderPostalCode String
-  senderCountry String
+  fromName String
+  fromEmail String
+  fromStreet String
+  fromCity String
+  fromPostCode String
+  fromCountry String
 
-  recipientName String
-  recipientEmail String
-  recipientStreet String
-  recipientCity String
-  recipientPostalCode String
-  recipientCountry String
+  toName String
+  toEmail String
+  toStreet String
+  toCity String
+  toPostCode String
+  toCountry String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -64,12 +64,12 @@ model Invoice {
   totalPayment Decimal @db.Decimal(10, 2)
   status Status @default(Pending)
 
+
   userId String @db.Uuid
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items Item[]
 
-  //dodamy po id + userId
   @@index([id, userId])
   @@map("invoices")
 }
