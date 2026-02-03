@@ -11,10 +11,10 @@ import {
 const router: Router = express.Router();
 
 router.get("/invoices", getInvoices);
-router.get("/invoices/:id", getInvoiceById);
-router.patch("/invoices/:id", markAsPaid);
-router.delete("/invoices/:id", deleteInvoice);
 router.post("/invoices", createInvoice);
-router.put("/invoices/:id", editInvoice);
+router.get("/invoices/:id", getInvoiceById);
+router.patch("/invoices/:id", editInvoice);
+router.patch("/invoices/:id/pay", markAsPaid);
+router.delete("/invoices/:id", deleteInvoice);
 
 export { router };

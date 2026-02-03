@@ -49,6 +49,7 @@ const FormSchema = z.object({
   items: z
     .array(
       z.object({
+        id: z.string().optional(),
         name: z.string().min(1, "Item name is required.").max(100),
         quantity: z
           .number()

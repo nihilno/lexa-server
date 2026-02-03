@@ -106,7 +106,7 @@ export async function deleteInvoice(req: Request, res: Response) {
 export async function createInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "2b8f6eae-a844-4c03-ae73-d58faa87b00d"; // placeholder
+  const userId = "8ecb486a-0c64-4111-952d-e7e6d554b0a6"; // placeholder
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -175,13 +175,14 @@ export async function createInvoice(req: Request, res: Response) {
 export async function editInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "2b8f6eae-a844-4c03-ae73-d58faa87b00d"; // placeholder
+  const userId = "8ecb486a-0c64-4111-952d-e7e6d554b0a6"; // placeholder
+
+  // check if user owns the invoice
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     return res.status(400).json({ message: "Invalid invoice ID" });
   }
 
-  // check if user owns the invoice
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -218,30 +219,81 @@ export async function editInvoice(req: Request, res: Response) {
         Number(validated.data.paymentTerms.split(" ")[1]) * 24 * 60 * 60 * 1000,
     );
 
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { id },
+      // userId
+      include: { items: true },
+    });
+
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    const existingItemIds = existingInvoice.items.map((item) => item.id);
+    const updateItems: {
+      where: { id: string };
+      data: { name: string; quantity: number; price: Prisma.Decimal };
+    }[] = items
+      .filter(
+        (
+          i,
+        ): i is { id: string; name: string; quantity: number; price: number } =>
+          !!i.id,
+      )
+      .map((item) => ({
+        where: { id: item.id },
+        data: {
+          name: item.name,
+          quantity: item.quantity,
+          price: new Prisma.Decimal(item.price),
+        },
+      }));
+
+    const formItemIds = items.filter((i) => i.id).map((i) => i.id);
+    const deleteItemIds = existingItemIds.filter(
+      (id) => !formItemIds.includes(id),
+    );
+
+    const createItems = items
+      .filter((i) => !("id" in i) || !i.id)
+      .map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: new Prisma.Decimal(item.price),
+      }));
+
+    const itemsNested: any = {};
+    if (updateItems.length > 0) {
+      itemsNested.update = updateItems;
+    }
+
+    if (deleteItemIds.length > 0) {
+      itemsNested.deleteMany = { id: { in: deleteItemIds } };
+    }
+
+    if (createItems.length > 0) {
+      itemsNested.create = createItems;
+    }
+
     const invoiceData = {
       ...rest,
       totalPayment,
       userId,
       fromName: "Maciej Kowalski",
       fromEmail: "maciej.kowalski@example.com",
-      issueDate,
+      issueDate: new Date(issueDate),
       paymentDue,
       status: "Pending" as const,
-      items: {
-        create: items.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: new Prisma.Decimal(item.price),
-        })),
-      },
+      items: itemsNested,
     };
 
     const invoice = await prisma.invoice.update({
       where: { id },
       data: invoiceData,
+      include: { items: true },
     });
 
-    return res.status(201).json({ message: "Invoice created", invoice });
+    return res.status(200).json({ message: "Invoice updated", invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
     res.status(500).json({ message: "Internal server error" });
