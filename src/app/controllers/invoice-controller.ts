@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { FormSchema } from "../../lib/schema.js";
+import { validateItems } from "../utils/validateData.js";
 
 export async function getInvoices(req: Request, res: Response) {
   // check if user is the owner
@@ -16,10 +17,10 @@ export async function getInvoices(req: Request, res: Response) {
       totalPayment: invoice.totalPayment.toNumber(),
     }));
 
-    res.status(200).json(invoices);
+    return res.status(200).json(invoices);
   } catch (error) {
     console.error("Error fetching invoices:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -53,10 +54,10 @@ export async function getInvoiceById(req: Request, res: Response) {
       })),
     };
 
-    res.status(200).json(invoice);
+    return res.status(200).json(invoice);
   } catch (error) {
     console.error(`Error fetching invoice with id ${id}:`, error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -75,31 +76,30 @@ export async function markAsPaid(req: Request, res: Response) {
       data: { status: "Paid" },
     });
 
-    res.status(200).json({ message: "Invoice marked as paid", invoice });
+    return res.status(200).json({ message: "Invoice marked as paid", invoice });
   } catch (error) {
     console.error(`Error marking invoice with id ${id} as paid:`, error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
 export async function deleteInvoice(req: Request, res: Response) {
   // check if user is the owner
-
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     return res.status(400).json({ message: "Invalid invoice ID" });
   }
 
-  const invoice = await prisma.invoice.delete({
-    where: { id },
-    // userId
-  });
-
-  res.status(200).json({ message: "Invoice deleted.", invoice });
   try {
+    const invoice = await prisma.invoice.delete({
+      where: { id },
+      // userId
+    });
+
+    return res.status(200).json({ message: "Invoice deleted.", invoice });
   } catch (error) {
     console.error(`Error marking invoice with id ${id} as paid:`, error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -116,22 +116,15 @@ export async function createInvoice(req: Request, res: Response) {
     });
   }
 
-  const { items, issueDate, ...rest } = validated.data;
+  const { items, ...rest } = validated.data;
 
   try {
-    for (const item of validated.data.items) {
-      if (item.quantity < 1 || item.quantity > 999) {
-        return res
-          .status(400)
-          .json({ message: "Item quantity must be between 1 and 999" });
-      }
-
-      if (item.price < 1 || item.price > 99999) {
-        return res
-          .status(400)
-          .json({ message: "Item price must be between 1 and 99999" });
-      }
+    const isValidItems = validateItems(items);
+    if (!isValidItems) {
+      return res.status(400).json({ message: "Invalid item data" });
     }
+
+    const issueDate = new Date(validated.data.issueDate);
 
     const totalPayment = items.reduce(
       (acc, item) => acc.add(new Prisma.Decimal(item.quantity).mul(item.price)),
@@ -168,7 +161,7 @@ export async function createInvoice(req: Request, res: Response) {
     return res.status(201).json({ message: "Invoice created", invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -192,22 +185,15 @@ export async function editInvoice(req: Request, res: Response) {
     });
   }
 
-  const { items, issueDate, ...rest } = validated.data;
+  const { items, ...rest } = validated.data;
 
   try {
-    for (const item of validated.data.items) {
-      if (item.quantity < 1 || item.quantity > 999) {
-        return res
-          .status(400)
-          .json({ message: "Item quantity must be between 1 and 999" });
-      }
-
-      if (item.price < 1 || item.price > 99999) {
-        return res
-          .status(400)
-          .json({ message: "Item price must be between 1 and 99999" });
-      }
+    const isValidItems = validateItems(items);
+    if (!isValidItems) {
+      return res.status(400).json({ message: "Invalid item data" });
     }
+
+    const issueDate = new Date(validated.data.issueDate);
 
     const totalPayment = items.reduce(
       (acc, item) => acc.add(new Prisma.Decimal(item.quantity).mul(item.price)),
@@ -281,7 +267,7 @@ export async function editInvoice(req: Request, res: Response) {
       userId,
       fromName: "Maciej Kowalski",
       fromEmail: "maciej.kowalski@example.com",
-      issueDate: new Date(issueDate),
+      issueDate,
       paymentDue,
       status: "Pending" as const,
       items: itemsNested,
@@ -290,12 +276,11 @@ export async function editInvoice(req: Request, res: Response) {
     const invoice = await prisma.invoice.update({
       where: { id },
       data: invoiceData,
-      include: { items: true },
     });
 
     return res.status(200).json({ message: "Invoice updated", invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }

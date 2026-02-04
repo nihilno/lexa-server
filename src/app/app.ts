@@ -17,4 +17,4 @@ app.use(
   }),
 );
 
-app.use("/api", InvoiceRouter);
+app.use("/api/invoices", InvoiceRouter);

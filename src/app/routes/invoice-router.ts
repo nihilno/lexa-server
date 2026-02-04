@@ -10,11 +10,11 @@ import {
 
 const router: Router = express.Router();
 
-router.get("/invoices", getInvoices);
-router.post("/invoices", createInvoice);
-router.get("/invoices/:id", getInvoiceById);
-router.patch("/invoices/:id", editInvoice);
-router.patch("/invoices/:id/pay", markAsPaid);
-router.delete("/invoices/:id", deleteInvoice);
+router.get("/", getInvoices);
+router.post("/", createInvoice);
+router.get("/:id", getInvoiceById);
+router.patch("/:id", editInvoice);
+router.patch("/:id/pay", markAsPaid);
+router.delete("/:id", deleteInvoice);
 
 export { router };
