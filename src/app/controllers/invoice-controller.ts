@@ -106,7 +106,7 @@ export async function deleteInvoice(req: Request, res: Response) {
 export async function createInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "8ecb486a-0c64-4111-952d-e7e6d554b0a6"; // placeholder
+  const userId = "767734cb-6a4f-42fb-8dc5-a4862611e7ed"; // placeholder
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -168,7 +168,7 @@ export async function createInvoice(req: Request, res: Response) {
 export async function editInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "8ecb486a-0c64-4111-952d-e7e6d554b0a6"; // placeholder
+  const userId = "767734cb-6a4f-42fb-8dc5-a4862611e7ed"; // placeholder
 
   // check if user owns the invoice
   const { id } = req.params;
