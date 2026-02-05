@@ -106,6 +106,8 @@ export async function deleteInvoice(req: RequestWithUser, res: Response) {
 
 export async function createInvoice(req: RequestWithUser, res: Response) {
   const userId = req?.user!.id;
+  const fromName = req.user?.name ? req.user.name : "--";
+  const fromEmail = req.user?.email ? req.user.email : "--";
 
   const validated = FormSchema.safeParse(req.body);
 
@@ -140,8 +142,8 @@ export async function createInvoice(req: RequestWithUser, res: Response) {
       ...rest,
       totalPayment,
       userId,
-      fromName: "Maciej Kowalski",
-      fromEmail: "maciej.kowalski@example.com",
+      fromName,
+      fromEmail,
       issueDate,
       paymentDue,
       status: "Pending" as const,
@@ -167,6 +169,8 @@ export async function createInvoice(req: RequestWithUser, res: Response) {
 
 export async function editInvoice(req: RequestWithUser, res: Response) {
   const userId = req?.user!.id;
+  const fromName = req.user?.name ? req.user.name : "--";
+  const fromEmail = req.user?.email ? req.user.email : "--";
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -261,8 +265,8 @@ export async function editInvoice(req: RequestWithUser, res: Response) {
       ...rest,
       totalPayment,
       userId,
-      fromName: "Maciej Kowalski",
-      fromEmail: "maciej.kowalski@example.com",
+      fromName,
+      fromEmail,
       issueDate,
       paymentDue,
       status: "Pending" as const,
