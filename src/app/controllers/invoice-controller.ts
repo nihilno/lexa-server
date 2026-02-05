@@ -5,7 +5,7 @@ import { FormSchema } from "../../lib/schema.js";
 import { validateItems } from "../utils/validateData.js";
 
 export async function getInvoices(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   try {
     const data = await prisma.invoice.findMany({
@@ -27,7 +27,7 @@ export async function getInvoices(req: RequestWithUser, res: Response) {
 }
 
 export async function getInvoiceById(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -63,7 +63,7 @@ export async function getInvoiceById(req: RequestWithUser, res: Response) {
 }
 
 export async function markAsPaid(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -85,7 +85,7 @@ export async function markAsPaid(req: RequestWithUser, res: Response) {
 }
 
 export async function deleteInvoice(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -105,7 +105,7 @@ export async function deleteInvoice(req: RequestWithUser, res: Response) {
 }
 
 export async function createInvoice(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   const validated = FormSchema.safeParse(req.body);
 
@@ -166,7 +166,7 @@ export async function createInvoice(req: RequestWithUser, res: Response) {
 }
 
 export async function editInvoice(req: RequestWithUser, res: Response) {
-  const userId = req.user!.id;
+  const userId = req?.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
