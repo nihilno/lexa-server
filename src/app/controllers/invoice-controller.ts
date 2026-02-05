@@ -1,16 +1,18 @@
-import { type Request, type Response } from "express";
+import { type Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { FormSchema } from "../../lib/schema.js";
 import { validateItems } from "../utils/validateData.js";
 
-export async function getInvoices(req: Request, res: Response) {
-  // check if user is the owner
+export async function getInvoices(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
 
   try {
     const data = await prisma.invoice.findMany({
       orderBy: { createdAt: "desc" },
-      // where: { userId },
+      where: {
+        userId,
+      },
     });
     const invoices = data.map((invoice) => ({
       ...invoice,
@@ -24,8 +26,8 @@ export async function getInvoices(req: Request, res: Response) {
   }
 }
 
-export async function getInvoiceById(req: Request, res: Response) {
-  // check if user is the owner
+export async function getInvoiceById(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -34,8 +36,7 @@ export async function getInvoiceById(req: Request, res: Response) {
 
   try {
     const data = await prisma.invoice.findUnique({
-      where: { id },
-      // where : {userId}
+      where: { id, userId },
       include: {
         items: true,
       },
@@ -61,8 +62,8 @@ export async function getInvoiceById(req: Request, res: Response) {
   }
 }
 
-export async function markAsPaid(req: Request, res: Response) {
-  // check if user is the owner
+export async function markAsPaid(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
 
   const { id } = req.params;
   if (!id || typeof id !== "string") {
@@ -71,8 +72,7 @@ export async function markAsPaid(req: Request, res: Response) {
 
   try {
     const invoice = await prisma.invoice.update({
-      where: { id },
-      // where: { id, userId },
+      where: { id, userId },
       data: { status: "Paid" },
       include: { items: true },
     });
@@ -84,8 +84,9 @@ export async function markAsPaid(req: Request, res: Response) {
   }
 }
 
-export async function deleteInvoice(req: Request, res: Response) {
-  // check if user is the owner
+export async function deleteInvoice(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
+
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     return res.status(400).json({ message: "Invalid invoice ID" });
@@ -93,8 +94,7 @@ export async function deleteInvoice(req: Request, res: Response) {
 
   try {
     const invoice = await prisma.invoice.delete({
-      where: { id },
-      // userId
+      where: { id, userId },
     });
 
     return res.status(200).json({ message: "Invoice deleted.", invoice });
@@ -104,10 +104,9 @@ export async function deleteInvoice(req: Request, res: Response) {
   }
 }
 
-export async function createInvoice(req: Request, res: Response) {
-  // check if user is logged in
+export async function createInvoice(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
 
-  const userId = "a613155c-73d1-4d35-96b5-959495972419"; // placeholder
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -166,12 +165,9 @@ export async function createInvoice(req: Request, res: Response) {
   }
 }
 
-export async function editInvoice(req: Request, res: Response) {
-  // check if user is logged in
+export async function editInvoice(req: RequestWithUser, res: Response) {
+  const userId = req.user!.id;
 
-  const userId = "a613155c-73d1-4d35-96b5-959495972419"; // placeholder
-
-  // check if user owns the invoice
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     return res.status(400).json({ message: "Invalid invoice ID" });
@@ -207,8 +203,7 @@ export async function editInvoice(req: Request, res: Response) {
     );
 
     const existingInvoice = await prisma.invoice.findUnique({
-      where: { id },
-      // userId
+      where: { id, userId },
       include: { items: true },
     });
 
@@ -275,14 +270,14 @@ export async function editInvoice(req: Request, res: Response) {
     };
 
     const invoice = await prisma.invoice.update({
-      where: { id },
+      where: { id, userId },
       data: invoiceData,
       include: { items: true },
     });
 
     return res.status(200).json({ message: "Invoice updated", invoice });
   } catch (error) {
-    console.error("Error creating invoice:", error);
+    console.error("Error updating invoice:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }

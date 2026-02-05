@@ -7,8 +7,11 @@ import {
   getInvoices,
   markAsPaid,
 } from "../controllers/invoice-controller.js";
+import { requireAuth } from "../middlewares/auth-middleware.js";
 
 const router: Router = express.Router();
+
+router.use(requireAuth);
 
 router.get("/", getInvoices);
 router.post("/", createInvoice);
