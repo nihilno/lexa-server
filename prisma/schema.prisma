@@ -8,133 +8,132 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid()) @db.Uuid
-  name String
-  email String @unique
-  emailVerified Boolean @default(false)
-  password String
-  image String?
-
-  defaultAddressId String? @db.Uuid
-  defaultAddress Address? @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
-
-  addresses     Address[]
-  invoices      Invoice[]
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
 
   accounts      Account[]
   sessions      Session[]
+  addresses     Address[]
+  invoices      Invoice[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  @@map("users")
-}
+  defaultAddressId String? @db.Uuid
+  defaultAddress   Address? @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id], onDelete: SetNull)
 
-model Account {
-  id                String   @id @default(uuid())
-  type              String
-  provider          String
-  providerAccountId String
-
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  userId            String    @db.Uuid
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([provider, providerAccountId])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
-  expires      DateTime
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userId       String   @db.Uuid
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-model Address {
-  id String @id @default(uuid()) @db.Uuid
-
-  name String
-  email String
-  street String
-  city String
-  postalCode String
-  country String
-
-  userId String @db.Uuid
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  usersWithThisAsDefault User[] @relation("UserDefaultAddress")
-
-  @@map("addresses")
-}
-
-model Invoice {
-  id String @id @default(uuid()) @db.Uuid
-  projectDescription String
-
-  fromName String
-  fromEmail String
-  fromStreet String
-  fromCity String
-  fromPostCode String
-  fromCountry String
-
-  toName String
-  toEmail String
-  toStreet String
-  toCity String
-  toPostCode String
-  toCountry String
-  issueDate DateTime
-  paymentDue DateTime
-  paymentTerms String
-  totalPayment Decimal @db.Decimal(10, 2)
-  status Status @default(Pending)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
 
-  userId String @db.Uuid
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Account {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  items Item[]
+  accountId             String
+  providerId            String
+
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+
+  password              String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Address {
+  id         String   @id @default(uuid()) @db.Uuid
+
+  name       String
+  email      String
+  street     String
+  city       String
+  postalCode String
+  country    String
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  usersWithThisAsDefault User[] @relation("UserDefaultAddress")
+}
+
+model Invoice {
+  id                 String   @id @default(uuid()) @db.Uuid
+  projectDescription String
+
+  fromName           String
+  fromEmail          String
+  fromStreet         String
+  fromCity           String
+  fromPostCode       String
+  fromCountry        String
+
+  toName             String
+  toEmail            String
+  toStreet           String
+  toCity             String
+  toPostCode         String
+  toCountry          String
+
+  issueDate          DateTime
+  paymentDue         DateTime
+  paymentTerms       String
+  totalPayment       Decimal  @db.Decimal(10, 2)
+  status             Status   @default(Pending)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items              Item[]
 
   @@index([id, userId])
-  @@map("invoices")
 }
 
 model Item {
-  id String @id @default(uuid()) @db.Uuid
-  name String
-  quantity Int
-  price Decimal @db.Decimal(10, 2)
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
 
-  invoiceId String @db.Uuid
-  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-
-  @@map("items")
+  invoiceId String   @db.Uuid
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 enum Status {
@@ -142,6 +141,3 @@ enum Status {
   Pending
   Paid
 }
-
-
-

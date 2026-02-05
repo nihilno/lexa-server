@@ -5,8 +5,6 @@ import { auth } from "../lib/auth.js";
 import { router as InvoiceRouter } from "./routes/invoice-router.js";
 
 export const app: Express = express();
-app.all("/api/auth/{*splat}", toNodeHandler(auth));
-app.use(express.json());
 
 if (!process.env.FRONTEND_URL) {
   throw new Error("FRONTEND_URL environment variable is required");
@@ -19,5 +17,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.all("/api/auth/{*splat}", toNodeHandler(auth));
+app.use(express.json());
 
 app.use("/api/invoices", InvoiceRouter);

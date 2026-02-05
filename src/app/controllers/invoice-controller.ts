@@ -74,6 +74,7 @@ export async function markAsPaid(req: Request, res: Response) {
       where: { id },
       // where: { id, userId },
       data: { status: "Paid" },
+      include: { items: true },
     });
 
     return res.status(200).json({ message: "Invoice marked as paid", invoice });
@@ -106,7 +107,7 @@ export async function deleteInvoice(req: Request, res: Response) {
 export async function createInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "767734cb-6a4f-42fb-8dc5-a4862611e7ed"; // placeholder
+  const userId = "a613155c-73d1-4d35-96b5-959495972419"; // placeholder
   const validated = FormSchema.safeParse(req.body);
 
   if (!validated.success) {
@@ -168,7 +169,7 @@ export async function createInvoice(req: Request, res: Response) {
 export async function editInvoice(req: Request, res: Response) {
   // check if user is logged in
 
-  const userId = "767734cb-6a4f-42fb-8dc5-a4862611e7ed"; // placeholder
+  const userId = "a613155c-73d1-4d35-96b5-959495972419"; // placeholder
 
   // check if user owns the invoice
   const { id } = req.params;
@@ -276,6 +277,7 @@ export async function editInvoice(req: Request, res: Response) {
     const invoice = await prisma.invoice.update({
       where: { id },
       data: invoiceData,
+      include: { items: true },
     });
 
     return res.status(200).json({ message: "Invoice updated", invoice });
