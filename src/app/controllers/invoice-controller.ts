@@ -269,7 +269,7 @@ export async function editInvoice(req: RequestWithUser, res: Response) {
       fromEmail,
       issueDate,
       paymentDue,
-      status: "Pending" as const,
+      status: existingInvoice.status,
       items: itemsNested,
     };
 
